@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="pt-br" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PAULISTA REFORMAS - Gestão de Obras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Base print styles */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+      }
+
+      /* Styles for PDF Generation with html2canvas */
+      .pdf-document {
+        display: block;
+        background: white !important;
+        color: #111827 !important;
+        font-family: 'Inter', sans-serif;
+        padding: 2rem;
+        width: 210mm; /* A4 width */
+        box-sizing: border-box;
+      }
+      .pdf-document .pdf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #E5E7EB;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+      }
+      .pdf-document .pdf-header h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #1E3A8A;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+      }
+      .pdf-document .pdf-header p {
+        font-size: 0.875rem;
+        color: #4B5563;
+      }
+      .pdf-document .pdf-header img {
+        height: 50px;
+        max-width: 150px;
+        object-fit: contain;
+      }
+      .pdf-document h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #1E40AF;
+      }
+      .pdf-document table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+      .pdf-document th, .pdf-document td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #E5E7EB;
+      }
+      .pdf-document thead th {
+        background-color: #F3F4F6;
+        font-weight: 600;
+        color: #374151;
+      }
+      .pdf-document tbody tr:nth-child(even) {
+        background-color: #F9FAFB;
+      }
+      .pdf-document .text-right { text-align: right; }
+      .pdf-document .font-bold { font-weight: 700; }
+      .pdf-document .pdf-totals-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 2rem;
+      }
+      .pdf-document .pdf-totals-box {
+        width: 45%;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border: 1px solid #E5E7EB;
+      }
+      .pdf-document .pdf-totals-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+      }
+      .pdf-document .pdf-totals-row.total {
+        font-size: 1.125rem;
+        font-weight: 700;
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid #D1D5DB;
+        color: #1E3A8A;
+      }
+      .pdf-document .pdf-footer {
+        text-align: center;
+        margin-top: 3rem;
+        font-size: 0.75rem;
+        color: #6B7280;
+      }
+      .pdf-document .pdf-signature {
+        margin-top: 5rem;
+        padding-top: 2rem;
+      }
+      .pdf-document .pdf-signature .line {
+        width: 75%;
+        margin: 0 auto 0.5rem auto;
+        border-top: 1px solid #374151;
+      }
+      .pdf-document .pdf-signature p {
+        text-align: center;
+        font-size: 0.875rem;
+      }
+      .pdf-document .break-inside-avoid {
+        break-inside: avoid;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                DEFAULT: '#4F46E5', // indigo-600
+                hover: '#4338CA', // indigo-700
+                light: '#E0E7FF', // indigo-100
+                dark: '#3730A3'  // indigo-800
+              },
+              secondary: {
+                DEFAULT: '#F97316', // orange-500
+                hover: '#FB923C'  // orange-400
+              },
+              neutral: { // Replaced with Slate for a cooler, more modern gray
+                  50: '#F8FAFC',  // slate-50
+                  100: '#F1F5F9', // slate-100
+                  200: '#E2E8F0', // slate-200
+                  300: '#CBD5E1', // slate-300
+                  400: '#94A3B8', // slate-400
+                  500: '#64748B', // slate-500
+                  600: '#475569', // slate-600
+                  700: '#334155', // slate-700
+                  800: '#1E293B', // slate-800
+                  900: '#0F172A'  // slate-900
+              }
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.4s ease-in-out',
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
+            },
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.9.0",
+    "recharts": "https://esm.sh/recharts@^3.1.0",
+    "framer-motion": "https://esm.sh/framer-motion@^11.3.19",
+    "jspdf": "https://esm.sh/jspdf@^2.5.1",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-neutral-50 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 transition-colors duration-300">
+    <div id="root"></div>
+  </body>
+</html>
