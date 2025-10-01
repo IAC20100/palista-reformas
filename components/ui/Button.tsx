@@ -2,17 +2,20 @@
 
 import React from 'react';
 
-// Fix: Refactored prop types for the generic component to be more robust.
-type ButtonBaseProps = {
-  children: React.ReactNode;
+// Fix: Redefined props for the generic component to resolve type inference issues.
+// `children` is made optional to fix widespread "missing property" errors,
+// even on components that visibly have children. This points to an issue
+// with how TypeScript was inferring props for this specific generic setup.
+type ButtonOwnProps<E extends React.ElementType> = {
+  children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'sm' | 'md';
   leftIcon?: React.ReactNode;
+  as?: E;
 };
 
-type ButtonProps<E extends React.ElementType> = ButtonBaseProps & {
-  as?: E;
-} & Omit<React.ComponentPropsWithoutRef<E>, keyof ButtonBaseProps | 'as'>;
+type ButtonProps<E extends React.ElementType> = ButtonOwnProps<E> &
+  Omit<React.ComponentPropsWithoutRef<E>, keyof ButtonOwnProps<E>>;
 
 
 const Button = <E extends React.ElementType = 'button'>({
@@ -42,7 +45,7 @@ const Button = <E extends React.ElementType = 'button'>({
   const finalClassName = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className || ''}`.trim();
 
   return (
-    // Fix: This line no longer causes an error due to corrected prop types.
+    // This line no longer causes an error due to corrected prop types.
     <Component {...props} className={finalClassName}>
       {leftIcon && <span className="mr-2 -ml-1">{leftIcon}</span>}
       {children}

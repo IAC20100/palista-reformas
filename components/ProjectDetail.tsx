@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useContext } from 'react';
 import { AISuggestion, Project } from '../types';
 import Card from './ui/Card';
@@ -13,6 +12,11 @@ import SummaryTab from './project/SummaryTab';
 import BudgetTab from './project/BudgetTab';
 import WorkOrderTab from './project/WorkOrderTab';
 import ExpensesTab from './project/ExpensesTab';
+import { ProjectStatus } from '../types';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import { ChartBarIcon } from './icons/ChartBarIcon';
+import { CalculatorIcon } from './icons/CalculatorIcon';
+import { ClipboardIcon } from './icons/ClipboardIcon';
 
 
 interface ProjectDetailProps {
@@ -22,6 +26,14 @@ interface ProjectDetailProps {
 }
 
 type ActiveTab = 'summary' | 'budget' | 'expenses' | 'work-order';
+
+const STATUS_CONFIG: { [key in ProjectStatus]: { text: string; bg: string; text_color: string; } } = {
+  Planejamento: { text: "Planejamento", bg: 'bg-neutral-200 dark:bg-neutral-700', text_color: 'text-neutral-800 dark:text-neutral-200' },
+  'Em Andamento': { text: "Em Andamento", bg: 'bg-blue-100 dark:bg-blue-900', text_color: 'text-blue-800 dark:text-blue-200' },
+  Pausado: { text: "Pausado", bg: 'bg-yellow-100 dark:bg-yellow-800/20', text_color: 'text-yellow-800 dark:text-yellow-200' },
+  Concluído: { text: "Concluído", bg: 'bg-green-100 dark:bg-green-800/20', text_color: 'text-green-800 dark:text-green-200' },
+  Cancelado: { text: "Cancelado", bg: 'bg-red-100 dark:bg-red-800/20', text_color: 'text-red-800 dark:text-red-200' },
+};
 
 const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, updateProject, onGoBack }) => {
     const { clients } = useContext(AppContext);
@@ -78,11 +90,12 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, updateProject, o
         return clients.find(c => c.id === project.clientId) || null;
     }, [project.clientId, clients]);
 
+    const statusConfig = STATUS_CONFIG[project.status];
 
     const TabButton: React.FC<{tabId: ActiveTab, children: React.ReactNode}> = ({ tabId, children }) => (
         <button
             onClick={() => setActiveTab(tabId)}
-            className={`whitespace-nowrap flex items-center gap-2 py-3 px-3 border-b-2 font-medium text-base focus:outline-none ${
+            className={`whitespace-nowrap flex items-center gap-2 py-3 px-3 border-b-2 font-medium text-base focus:outline-none transition-colors duration-150 ${
                 activeTab === tabId
                 ? 'border-primary text-primary'
                 : 'border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:border-neutral-300 dark:hover:border-neutral-500'
@@ -110,9 +123,18 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, updateProject, o
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center gap-2 flex-wrap no-print">
-                <Button variant="ghost" onClick={onGoBack}>&larr; Voltar para Projetos</Button>
-                <div className="flex gap-2 flex-wrap">
+             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 no-print">
+                <div>
+                    <Button variant="ghost" onClick={onGoBack} leftIcon={<ArrowLeftIcon className="h-5 w-5" />}>
+                        Voltar para Projetos
+                    </Button>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <h2 className="text-3xl font-bold text-neutral-800 dark:text-neutral-100">{project.name}</h2>
+                        <div className={`text-sm font-semibold px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text_color}`}>{statusConfig.text}</div>
+                    </div>
+                    <p className="text-neutral-500 dark:text-neutral-400 mt-1">{clientDetails?.name || 'Cliente desconhecido'} - {project.location}</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0 flex-wrap">
                     <AIBudgetAssistant onSuggestionsReady={handleAISuggestions} />
                     <Button variant="primary" onClick={() => setIsConsultancyModalOpen(true)} leftIcon={<SparklesIcon className="h-5 w-5" />}>
                         Consultoria IA
@@ -126,17 +148,12 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, updateProject, o
                 project={project}
             />
 
-            <Card className="no-print">
-                <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{project.name}</h2>
-                <p className="text-neutral-600 dark:text-neutral-400">{clientDetails?.name || 'Cliente desconhecido'} - {project.location}</p>
-            </Card>
-
             <div className="border-b border-neutral-200 dark:border-neutral-700 no-print">
-                <nav className="-mb-px flex space-x-2 sm:space-x-4" aria-label="Tabs">
-                    <TabButton tabId="summary">Resumo</TabButton>
-                    <TabButton tabId="budget">Orçamento</TabButton>
+                <nav className="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs">
+                    <TabButton tabId="summary"><ChartBarIcon className="h-5 w-5"/> Resumo</TabButton>
+                    <TabButton tabId="budget"><CalculatorIcon className="h-5 w-5"/> Orçamento</TabButton>
                     <TabButton tabId="expenses"><ReceiptIcon className="h-5 w-5" /> Gastos</TabButton>
-                    <TabButton tabId="work-order">Ordem de Serviço</TabButton>
+                    <TabButton tabId="work-order"><ClipboardIcon className="h-5 w-5"/> Ordem de Serviço</TabButton>
                 </nav>
             </div>
             
